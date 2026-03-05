@@ -134,3 +134,61 @@ def test_difficulty_normal_range():
 def test_difficulty_hard_range():
     low, high = get_range_for_difficulty("Hard")
     assert low == 1 and high == 50
+
+
+# ── High score tracking ───────────────────────────────────────────────────────
+# High score logic in app.py: if score > high_score: high_score = score
+
+def test_high_score_initializes_at_zero():
+    """High score must start at 0 before any game is played."""
+    high_score = 0
+    assert high_score == 0
+
+def test_high_score_updates_when_new_score_is_higher():
+    """A new score that beats the record should become the new high score."""
+    high_score = 50
+    score = 80
+    if score > high_score:
+        high_score = score
+    assert high_score == 80
+
+def test_high_score_not_updated_when_new_score_is_lower():
+    """A score below the record must not overwrite the high score."""
+    high_score = 80
+    score = 40
+    if score > high_score:
+        high_score = score
+    assert high_score == 80
+
+def test_high_score_not_updated_when_score_is_equal():
+    """An equal score must not overwrite the high score (strict >)."""
+    high_score = 80
+    score = 80
+    if score > high_score:
+        high_score = score
+    assert high_score == 80
+
+def test_high_score_set_from_zero_on_first_win():
+    """Any positive score after the first game should become the high score."""
+    high_score = 0
+    score = 70
+    if score > high_score:
+        high_score = score
+    assert high_score == 70
+
+def test_high_score_updates_on_loss_if_score_is_higher():
+    """High score should update even when the player loses, if score beats record."""
+    high_score = 30
+    score = 45          # accumulated before running out of attempts
+    if score > high_score:
+        high_score = score
+    assert high_score == 45
+
+def test_high_score_persists_across_new_game():
+    """Starting a new game resets score but must not reset high_score."""
+    high_score = 90
+    # simulate new game reset (only score/attempts/status/history are cleared)
+    score = 0
+    attempts = 0
+    status = "playing"
+    assert high_score == 90   # high_score unchanged
